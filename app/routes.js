@@ -2,7 +2,7 @@ const fastify = require('fastify')()
 fastify.register(require('fastify-xml-body-parser'))
 
 //import model
-const FamilyModel = require("./model");
+const FamilyModel = require("../models/family");
 
 async function routes (fastify, options) {
  //base route to the app
@@ -65,10 +65,10 @@ async function routes (fastify, options) {
 
 
     //find one member by email
-    fastify.get('/find_member', async (req, reply) => {
+    fastify.get('/find_member/:email', async (req, reply) => {
     try{ 
         
-        const { email } = req.query   // takes email as a query parameter
+        const { email } = req.params   // takes email as a parameter variable
     
           const familyMember = await FamilyModel.findOne({email})
           console.log(familyMember)
@@ -99,7 +99,8 @@ async function routes (fastify, options) {
             familyMember
             })
         }
-    }catch(err){
+    }
+    catch(err){
         console.log('error', err)
         return reply.status(500).send({
             error: true,

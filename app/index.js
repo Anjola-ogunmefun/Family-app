@@ -3,11 +3,10 @@ const fastify = require('fastify')({
 })
 
 
-//require and us external files
+//require and use external files
 fastify.register(require('../db'))
 fastify.register(require('./routes'))
-
-
+fastify.register(require('../app/auth'))
 
  
 // Run the server!
