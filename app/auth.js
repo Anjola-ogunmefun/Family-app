@@ -61,7 +61,7 @@ async function authRoutes (fastify, options) {
                 return reply.send({
                     code: 400,
                     error: true,
-                    message:'Wrong User name!'
+                    message:'Unregistered user!, Kindly login first'
                 })
             }
 
