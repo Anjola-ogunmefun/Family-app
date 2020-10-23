@@ -46,35 +46,41 @@ async function authRoutes (fastify, options) {
     const claims ={
         issuer,
         subject,
-        expiresIn:'2m'
+        expiresIn:'2m',
+        algorithm: 'RS256',
     };
 
     fastify.post('/login', async (req, reply) => {
         try{
-            const { userName, password} = req.body
-            const hashedPassword = await bcrypt.hash(req.body.password, 10);
-            const user = await bcrypt.compareSync(password, hashedPassword);
+            const { userName, password } = req.body
 
-            console.log('user', user)
-                    
+            
+            const findMatch = await User.findOne({userName})
+            console.log('find match', findMatch)
+            if(findMatch == null){
+                return reply.send({
+                    code: 400,
+                    error: true,
+                    message:'Wrong User name!'
+                })
+            }
+
+            const hashedPassword = findMatch.password;
+            const match = await bcrypt.compareSync(password, hashedPassword);
+               
             if(!password || !userName){
                 return reply.send({
                     code: 400,
                     error: true,
-                    messae:'Password or user name field cannot be empty'
+                    message:'Password or user name field cannot be empty'
                 })
-            }
-
-            if(user == null){
-                console.log('User not found!')
-                return reply.send('Cannot find user')
             }
 
             function generateAccessToken({claims}) {
                 return jwt.sign({claims}, process.env.ACCESS_TOKEN_SECRET)
             }
 
-            if(userName  && user == true ){
+            if(match === true && userName === findMatch.userName){
                 const name = userName               
                 const token = generateAccessToken({claims}) 
                 console.log('token', token)
@@ -86,7 +92,7 @@ async function authRoutes (fastify, options) {
                 return reply.send({
                     code: 400,
                     error: true,
-                    message:'Wrong user name or password!'
+                    message:'Wrong password!'
                 })
             }
         }
@@ -95,7 +101,7 @@ async function authRoutes (fastify, options) {
            return reply.status(400).send({
                 code: 400,
                 error: true,
-                error
+                message: error
             })
         }
 
